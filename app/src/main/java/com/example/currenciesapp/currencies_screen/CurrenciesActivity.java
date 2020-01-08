@@ -1,10 +1,12 @@
-package com.example.currenciesapp;
+package com.example.currenciesapp.currencies_screen;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.currenciesapp.R;
+
+public class CurrenciesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
