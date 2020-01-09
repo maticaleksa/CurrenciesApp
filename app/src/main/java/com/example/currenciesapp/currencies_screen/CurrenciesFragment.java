@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,13 +15,16 @@ import com.example.currenciesapp.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.android.support.DaggerFragment;
+
 /**
  * Displays a list of currencies with their respective rates.
  */
-public class CurrenciesFragment extends Fragment {
+public class CurrenciesFragment extends DaggerFragment {
 
     private RecyclerView list;
     private CurrenciesListAdapter adapter;
+
 
     @Nullable
     @Override

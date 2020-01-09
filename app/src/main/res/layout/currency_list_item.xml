@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_regular"
         android:layout_marginLeft="@dimen/margin_regular"
-        android:text="@{item.currencyShort}"
+        android:text="@{item.currencyCode}"
         android:textColor="@android:color/black"
         android:textSize="18sp"
         android:textStyle="bold"

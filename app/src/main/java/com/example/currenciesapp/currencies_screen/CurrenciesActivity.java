@@ -1,12 +1,13 @@
 package com.example.currenciesapp.currencies_screen;
 
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
 import com.example.currenciesapp.R;
 
-public class CurrenciesActivity extends AppCompatActivity {
+import dagger.android.support.DaggerAppCompatActivity;
+
+public class CurrenciesActivity extends DaggerAppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

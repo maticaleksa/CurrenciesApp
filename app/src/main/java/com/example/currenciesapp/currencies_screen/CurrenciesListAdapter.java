@@ -37,7 +37,7 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
     @Override
     public void onBindViewHolder(@NonNull CurrenciesViewHolder holder, int position) {
         holder.currency.setText(list.get(position).currency);
-        holder.currencyShort.setText(list.get(position).currencyShort);
+        holder.currencyCode.setText(list.get(position).currencyCode);
     }
 
     @Override
@@ -46,12 +46,12 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
     }
 
     class CurrenciesViewHolder extends RecyclerView.ViewHolder {
-        private TextView currencyShort;
+        private TextView currencyCode;
         private TextView currency;
         private EditText amount;
         public CurrenciesViewHolder(@NonNull View itemView) {
             super(itemView);
-            currencyShort = itemView.findViewById(R.id.currency_name_short);
+            currencyCode = itemView.findViewById(R.id.currency_name_short);
             currency = itemView.findViewById(R.id.currency_name);
             amount = itemView.findViewById(R.id.amount);
         }
