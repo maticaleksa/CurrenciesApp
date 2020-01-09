@@ -13,7 +13,7 @@ import dagger.android.support.AndroidSupportInjectionModule;
 
 @Singleton
 @Component(modules = {AndroidSupportInjectionModule.class, ActivityBuildersModule.class,
-        NetworkModule.class})
+        NetworkModule.class, RoomDatabaseModule.class})
 public interface AppComponent extends AndroidInjector<CurrenciesApplication> {
 
     void inject(CurrenciesApplication application);
