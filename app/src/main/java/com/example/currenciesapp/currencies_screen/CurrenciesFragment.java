@@ -12,9 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.currenciesapp.R;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import dagger.android.support.DaggerFragment;
 
 /**
@@ -34,17 +31,8 @@ public class CurrenciesFragment extends DaggerFragment {
         list = v.findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         list.setAdapter(adapter);
-        adapter.setList(getFakeListItems());
         return v;
     }
 
-    private List<CurrencyViewModel> getFakeListItems() {
-        List<CurrencyViewModel> list = new ArrayList<>();
-        list.add(new CurrencyViewModel("USD", "Dollar"));
-        list.add(new CurrencyViewModel("USD", "Dollar"));
-        list.add(new CurrencyViewModel("USD", "Dollar"));
-        list.add(new CurrencyViewModel("USD", "Dollar"));
-        list.add(new CurrencyViewModel("USD", "Dollar"));
-        return list;
-    }
+
 }

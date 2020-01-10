@@ -8,7 +8,7 @@ import retrofit2.http.GET;
 /**
  * Retrofit api calls.
  */
-public interface ApiEndpointsInterface {
+public interface NetworkRatesSource {
 
     @GET("latest?base=EUR")
     Call<NetworkRates> getRates();

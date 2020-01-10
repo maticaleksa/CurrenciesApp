@@ -1,5 +1,6 @@
 package com.example.currenciesapp.room;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -7,6 +8,7 @@ import androidx.room.PrimaryKey;
 public class RoomExchangeRate {
 
     @PrimaryKey
+    @NonNull
     public final String currencyCode;
 
     public final double exchangeRate;

@@ -1,7 +1,7 @@
 package com.example.currenciesapp.dagger_setup;
 
 
-import com.example.currenciesapp.network.ApiEndpointsInterface;
+import com.example.currenciesapp.network.NetworkRatesSource;
 
 import javax.inject.Singleton;
 
@@ -34,7 +34,7 @@ public class NetworkModule {
 
     @Singleton
     @Provides
-    public static ApiEndpointsInterface provideApiEndpointInterface(Retrofit retrofit) {
-        return retrofit.create(ApiEndpointsInterface.class);
+    public static NetworkRatesSource provideApiEndpointInterface(Retrofit retrofit) {
+        return retrofit.create(NetworkRatesSource.class);
     }
 }
