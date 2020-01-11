@@ -18,9 +18,9 @@ import java.util.List;
  */
 public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAdapter.CurrenciesViewHolder> {
 
-    private List<CurrencyViewModel> list;
+    private List<ExchangeRatesViewModel> list;
 
-    public void setList(List<CurrencyViewModel> list) {
+    public void setList(List<ExchangeRatesViewModel> list) {
         this.list = list;
         notifyDataSetChanged();
         // TODO: 1/8/2020 use diffutil
@@ -38,6 +38,7 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
     public void onBindViewHolder(@NonNull CurrenciesViewHolder holder, int position) {
         holder.currency.setText(list.get(position).currency);
         holder.currencyCode.setText(list.get(position).currencyCode);
+        holder.amount.setText(String.valueOf(list.get(position).rate));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
         private EditText amount;
         public CurrenciesViewHolder(@NonNull View itemView) {
             super(itemView);
-            currencyCode = itemView.findViewById(R.id.currency_name_short);
+            currencyCode = itemView.findViewById(R.id.currency_code);
             currency = itemView.findViewById(R.id.currency_name);
             amount = itemView.findViewById(R.id.amount);
         }

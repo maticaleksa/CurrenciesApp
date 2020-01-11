@@ -34,4 +34,5 @@ ext {
     retrofit_version = "2.6.2"
     last_adapter_version = "2.3.0"
     roomVersion = '2.2.2'
+    okhttp_logging_version = '3.8.0'
 }

@@ -11,17 +11,22 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.currenciesapp.R;
+import com.example.currenciesapp.general.BaseFragment;
 
-import dagger.android.support.DaggerFragment;
+import java.util.List;
+
+import javax.inject.Inject;
 
 /**
  * Displays a list of currencies with their respective rates.
  */
-public class CurrenciesFragment extends DaggerFragment {
+public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen {
 
     private RecyclerView list;
     private CurrenciesListAdapter adapter;
 
+    @Inject
+    CurrenciesPresenter presenter;
 
     @Nullable
     @Override
@@ -31,8 +36,18 @@ public class CurrenciesFragment extends DaggerFragment {
         list = v.findViewById(R.id.list);
         list.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         list.setAdapter(adapter);
+        setPresenter(presenter);
         return v;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        presenter.onDisplay(this);
+    }
 
+    @Override
+    public void displayCurrencies(List<ExchangeRatesViewModel> rates) {
+        adapter.setList(rates);
+    }
 }
