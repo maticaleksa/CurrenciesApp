@@ -2,10 +2,6 @@ package com.example.currenciesapp.domain;
 
 import java.util.Currency;
 
-/**
- * Domain class for exchange rates with their base in EUR.
- * TODO maybe add a field for base.
- */
 public class ExchangeRate {
 
     public final String base;

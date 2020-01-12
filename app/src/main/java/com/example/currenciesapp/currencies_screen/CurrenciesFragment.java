@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.currenciesapp.ErrorDialogFragment;
 import com.example.currenciesapp.R;
 import com.example.currenciesapp.general.BaseFragment;
 
@@ -49,5 +50,17 @@ public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen
     @Override
     public void displayCurrencies(List<ExchangeRatesViewModel> rates) {
         adapter.setList(rates);
+    }
+
+    @Override
+    public void displayError(ErrorType type) {
+        ErrorDialogFragment errorDialogFragment = new ErrorDialogFragment();
+        switch (type) {
+            case NO_INTERNET:
+                errorDialogFragment.displayDialog(getString(R.string.no_internet_stale_rates), getFragmentManager());
+                break;
+            case UNKNOWN_NETWORK_ERROR:
+                errorDialogFragment.displayDialog(getString(R.string.unknown_error_stale_rates), getFragmentManager());
+        }
     }
 }

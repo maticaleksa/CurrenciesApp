@@ -1,7 +1,11 @@
 package com.example.currenciesapp;
 
 import com.example.currenciesapp.domain.ExchangeRate;
+import com.example.currenciesapp.errors.NoInternetException;
+import com.example.currenciesapp.network.NetworkRates;
 import com.example.currenciesapp.network.NetworkRatesSource;
+import com.example.currenciesapp.network_checking.NetworkConnectivityNotifier;
+import com.example.currenciesapp.errors.UnknownNetworkException;
 import com.example.currenciesapp.room.RoomExchangeRate;
 import com.example.currenciesapp.room.RoomExchangeRateDao;
 
@@ -16,6 +20,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Response;
 
 /**
  * Repository for ExchangeRates.
@@ -24,11 +29,15 @@ public class ExchangeRatesRepository {
 
     private final RoomExchangeRateDao dao;
     private final NetworkRatesSource networkRatesSource;
+    private final NetworkConnectivityNotifier networkConnectivityNotifier;
 
     @Inject
-    public ExchangeRatesRepository(RoomExchangeRateDao dao, NetworkRatesSource networkRatesSource) {
+    public ExchangeRatesRepository(RoomExchangeRateDao dao,
+                                   NetworkRatesSource networkRatesSource,
+                                   NetworkConnectivityNotifier networkConnectivityNotifier) {
         this.dao = dao;
         this.networkRatesSource = networkRatesSource;
+        this.networkConnectivityNotifier = networkConnectivityNotifier;
     }
 
     /**
@@ -39,44 +48,45 @@ public class ExchangeRatesRepository {
     public Observable<Result<List<ExchangeRate>>> observeRates() {
         return getFromDb()
                 .mergeWith(
-                        Observable.interval(1, TimeUnit.SECONDS)
-                                .switchMap(_a -> getFromNetwork())
-                )
-                .map(Result::success);
+                        networkConnectivityNotifier.observeConnectionStatus()
+                                .switchMap(isConnected -> {
+                                            if (isConnected) {
+                                                return Observable.interval(1, TimeUnit.SECONDS)
+                                                        .switchMap(_a -> getFromNetwork());
+
+                                            } else {
+                                                return Observable.just(Result.error(new NoInternetException()));
+                                            }
+                                        }
+                                ));
     }
 
-    private Observable<List<ExchangeRate>> getFromNetwork() {
-        return Observable.fromCallable(() -> networkRatesSource.getRates().execute())
-                .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .doOnNext(networkRatesResponse -> {
-                    if (networkRatesResponse.isSuccessful()) {
-                        String base = networkRatesResponse.body().base;
-                        Map<String, Double> rates = networkRatesResponse.body().rates;
-                        List<RoomExchangeRate> roomExchangeRateList = new ArrayList<>();
-                        for (String key : rates.keySet()) {
-                            roomExchangeRateList.add(
-                                    new RoomExchangeRate(key, rates.get(key), base));
-                        }
-                        dao.insert(roomExchangeRateList);
-                    } else {
-                        // TODO: 1/10/2020 handle all errors
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(networkRatesResponse -> {
-                    Map<String, Double> rates = networkRatesResponse.body().rates;
-                    List<ExchangeRate> exchangeRates = new ArrayList<>();
-                    for (String key : rates.keySet()) {
-                        exchangeRates.add(new ExchangeRate(networkRatesResponse.body().base,
-                                Currency.getInstance(key), rates.get(key)));
-                    }
-                    return exchangeRates;
-                })
+    private Observable<Result<List<ExchangeRate>>> getFromNetwork() {
+        return Observable.fromCallable(() -> {
+            Response<NetworkRates> response = networkRatesSource.getRates().execute();
+            if (!response.isSuccessful()) {
+                return Result.<List<ExchangeRate>>error(new UnknownNetworkException(response.message()));
+            }
+            NetworkRates networkRates = response.body();
+            String base = networkRates.base;
+            Map<String, Double> rates = networkRates.rates;
+            List<RoomExchangeRate> roomExchangeRateList = new ArrayList<>();
+            for (String key : rates.keySet()) {
+                roomExchangeRateList.add(
+                        new RoomExchangeRate(key, rates.get(key), base));
+            }
+            dao.insert(roomExchangeRateList);
+            List<ExchangeRate> exchangeRates = new ArrayList<>();
+            for (String key : rates.keySet()) {
+                exchangeRates.add(new ExchangeRate(base,
+                        Currency.getInstance(key), rates.get(key)));
+            }
+            return Result.success(exchangeRates);
+        })
                 .filter(exchangeRates -> false);
     }
 
-    private Observable<List<ExchangeRate>> getFromDb() {
+    private Observable<Result<List<ExchangeRate>>> getFromDb() {
         return dao.getAll()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -87,6 +97,8 @@ public class ExchangeRatesRepository {
                                 Currency.getInstance(roomRate.currencyCode), roomRate.exchangeRate));
                     }
                     return exchangeRates;
-                }).toObservable();
+                })
+                .map(Result::success)
+                .toObservable();
     }
 }

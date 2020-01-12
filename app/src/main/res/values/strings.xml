@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CurrenciesApp</string>
+    <string name="no_internet_stale_rates">No Internet connection. Displayed rates are stale. Exchange rates will get updated as soon as devices gets connected again.</string>
+    <string name="unknown_error_stale_rates">Something went wrong, displaying stale rates.</string>
 </resources>
