@@ -1,7 +1,5 @@
 package com.example.currenciesapp.currencies_screen;
 
-import android.util.Log;
-
 import com.example.currenciesapp.ExchangeRatesRepository;
 import com.example.currenciesapp.domain.ExchangeRate;
 import com.example.currenciesapp.errors.NoInternetException;
@@ -29,11 +27,14 @@ public class CurrenciesPresenter extends BasePresenter {
                             if (listResult.success() && listResult.getData().size() != 0) {
                                 Currency baseCurrency = Currency.getInstance(listResult.getData().get(0).base);
                                 List<ExchangeRatesViewModel> list = new ArrayList<>();
-                                list.add(new ExchangeRatesViewModel(baseCurrency.getCurrencyCode(), baseCurrency.getDisplayName(), 1));
+                                list.add(new ExchangeRatesViewModel(baseCurrency.getCurrencyCode(),
+                                        baseCurrency.getDisplayName(), 1));
+
                                 for (ExchangeRate rate : listResult.getData()) {
                                     list.add(new ExchangeRatesViewModel(rate.currency.getCurrencyCode(),
                                             rate.currency.getDisplayName(), rate.rate));
                                 }
+
                                 screen.displayCurrencies(list);
                             } else {
                                 if (!listResult.success()) {
@@ -45,11 +46,8 @@ public class CurrenciesPresenter extends BasePresenter {
                                         screen.displayError(ErrorType.UNKNOWN);
                                 }
                             }
-                        },
-                        throwable -> {
-                            // TODO: 1/10/2020
-                            Log.e("ERR", throwable.getMessage());
-                        }));
+                        }
+                     ));
     }
 
 }

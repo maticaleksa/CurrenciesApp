@@ -21,7 +21,7 @@ import javax.inject.Inject;
 /**
  * Displays a list of currencies with their respective rates.
  */
-public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen {
+public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen, CurrenciesListAdapter.ItemClickListener {
 
     private RecyclerView list;
     private CurrenciesListAdapter adapter;
@@ -33,9 +33,10 @@ public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_currencies, container, false);
-        adapter = new CurrenciesListAdapter();
+        adapter = new CurrenciesListAdapter(this);
         list = v.findViewById(R.id.list);
-        list.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        list.setLayoutManager(layoutManager);
         list.setAdapter(adapter);
         setPresenter(presenter);
         return v;
@@ -62,5 +63,10 @@ public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen
             case UNKNOWN_NETWORK_ERROR:
                 errorDialogFragment.displayDialog(getString(R.string.unknown_error_stale_rates), getFragmentManager());
         }
+    }
+
+    @Override
+    public void onItemClick() {
+        list.scrollToPosition(0);
     }
 }

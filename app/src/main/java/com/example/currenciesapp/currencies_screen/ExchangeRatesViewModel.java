@@ -13,4 +13,23 @@ public class ExchangeRatesViewModel {
         this.currency = currency;
         this.rate = rate;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ExchangeRatesViewModel that = (ExchangeRatesViewModel) o;
+
+        if (currencyCode != null ? !currencyCode.equals(that.currencyCode) : that.currencyCode != null)
+            return false;
+        return currency != null ? currency.equals(that.currency) : that.currency == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = currencyCode != null ? currencyCode.hashCode() : 0;
+        result = 31 * result + (currency != null ? currency.hashCode() : 0);
+        return result;
+    }
 }
