@@ -83,6 +83,7 @@ public class ExchangeRatesRepository {
             }
             return Result.success(exchangeRates);
         })
+                .observeOn(AndroidSchedulers.mainThread())
                 .filter(exchangeRates -> false);
     }
 

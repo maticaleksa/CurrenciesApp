@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.currenciesapp.ErrorDialogFragment;
 import com.example.currenciesapp.R;
+import com.example.currenciesapp.domain.Money;
 import com.example.currenciesapp.general.BaseFragment;
 
 import java.util.List;
@@ -29,11 +30,14 @@ public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen
     @Inject
     CurrenciesPresenter presenter;
 
+    private Money money;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_currencies, container, false);
         adapter = new CurrenciesListAdapter(this);
+        adapter.setHasStableIds(true);
         list = v.findViewById(R.id.list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         list.setLayoutManager(layoutManager);
@@ -66,7 +70,19 @@ public class CurrenciesFragment extends BaseFragment implements CurrenciesScreen
     }
 
     @Override
+    public Money getInsertedMoneyAmount() {
+        return money;
+    }
+
+    @Override
     public void onItemClick() {
         list.scrollToPosition(0);
     }
+
+    @Override
+    public void onAmountChanged(Money money) {
+        this.money = money;
+        presenter.onAmountChanged(this);
+    }
+
 }

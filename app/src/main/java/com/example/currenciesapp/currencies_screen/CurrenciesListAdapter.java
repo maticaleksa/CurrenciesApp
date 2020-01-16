@@ -1,5 +1,7 @@
 package com.example.currenciesapp.currencies_screen;
 
+import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,40 +10,56 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.currenciesapp.R;
+import com.example.currenciesapp.domain.Money;
+import com.example.currenciesapp.general.BasicTextWatcher;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Adapter that populates currency list.
  */
 public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAdapter.CurrenciesViewHolder> {
 
-    private List<ExchangeRatesViewModel> list;
+    private List<ExchangeRatesViewModel> list = new ArrayList<>();
     private ExchangeRatesViewModel focusedItem;
+    private CurrenciesViewHolder focusedHolder;
 
     interface ItemClickListener {
         void onItemClick();
+
+        void onAmountChanged(Money money);
     }
+
     private ItemClickListener itemClickListener;
 
     public CurrenciesListAdapter(ItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
     }
 
+    @Override
+    public long getItemId(int position) {
+        return list.get(position).getStableId();
+    }
+
     public void setList(List<ExchangeRatesViewModel> list) {
-        this.list = list;
         if (focusedItem != null) {
             int index = list.indexOf(focusedItem);
             ExchangeRatesViewModel first = list.get(0);
-            this.list.set(0, focusedItem);
-            this.list.set(index, first);
+            list.set(0, focusedItem);
+            list.set(index, first);
         }
+        this.list = list;
         notifyDataSetChanged();
-        // TODO: 1/8/2020 use diffutil
+
     }
 
     @NonNull
@@ -53,19 +71,48 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
 
     @Override
     public void onBindViewHolder(@NonNull CurrenciesViewHolder holder, int position) {
-        ExchangeRatesViewModel exchangeRateViewModel = list.get(position);
+        ExchangeRatesViewModel exchangeRateViewModel = list.get(holder.getAdapterPosition());
+        if (focusedHolder == null && holder.getAdapterPosition() == 0) {
+            focusedHolder = holder;
+            focusedItem = list.get(0);
+            holder.amount.setFocusable(true);
+            holder.amount.setFocusableInTouchMode(true);
+        }
         holder.itemView.setOnClickListener(v -> {
-            ExchangeRatesViewModel selected = list.get(position);
+            if (focusedHolder != null) {
+                focusedHolder.amount.setFocusable(false);
+                focusedHolder.amount.setFocusableInTouchMode(false);
+            }
+            focusedHolder = holder;
+            holder.amount.setFocusable(true);
+            holder.amount.setFocusableInTouchMode(true);
+            focusedItem = list.get(holder.getAdapterPosition());
             ExchangeRatesViewModel first = list.get(0);
-            focusedItem = selected;
-            list.set(position, first);
-            list.set(0, selected);
+            list.set(holder.getAdapterPosition(), first);
+            list.set(0, focusedItem);
             itemClickListener.onItemClick();
-            notifyItemMoved(position, 0);
+            notifyItemMoved(holder.getAdapterPosition(), 0);
+        });
+        holder.amount.addTextChangedListener(new BasicTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!holder.amount.isFocused() || s.toString() == null || s.toString().equals(""))
+                    return;
+                ExchangeRatesViewModel newModel = new ExchangeRatesViewModel(focusedItem.currencyCode, focusedItem.currency, Double.valueOf(s.toString()));
+                list.set(list.indexOf(focusedItem), newModel);
+                focusedItem = newModel;
+                itemClickListener.onAmountChanged(
+                        new Money(BigDecimal.valueOf(Float.valueOf(s.toString())), Currency.getInstance(focusedItem.currencyCode))
+                );
+            }
         });
         holder.currency.setText(exchangeRateViewModel.currency);
         holder.currencyCode.setText(exchangeRateViewModel.currencyCode);
-        holder.amount.setText(String.valueOf(exchangeRateViewModel.rate));
+
+        if (!holder.amount.isFocused()) {
+            holder.amount.setText(String.format(Locale.ENGLISH, "%.2f", exchangeRateViewModel.amount));
+        }
+
         Glide.with(holder.itemView)
                 .load("https://www.countryflags.io/" + exchangeRateViewModel.currencyCode.substring(0, 2) + "/flat/64.png")
                 .into(holder.flagIcon);

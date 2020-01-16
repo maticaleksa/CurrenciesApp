@@ -13,4 +13,22 @@ public class ExchangeRate {
         this.currency = currency;
         this.rate = rate;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ExchangeRate that = (ExchangeRate) o;
+
+        if (base != null ? !base.equals(that.base) : that.base != null) return false;
+        return currency != null ? currency.equals(that.currency) : that.currency == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = base != null ? base.hashCode() : 0;
+        result = 31 * result + (currency != null ? currency.hashCode() : 0);
+        return result;
+    }
 }

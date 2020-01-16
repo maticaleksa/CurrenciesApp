@@ -2,10 +2,13 @@ package com.example.currenciesapp.currencies_screen;
 
 import com.example.currenciesapp.ExchangeRatesRepository;
 import com.example.currenciesapp.domain.ExchangeRate;
+import com.example.currenciesapp.domain.Money;
 import com.example.currenciesapp.errors.NoInternetException;
 import com.example.currenciesapp.errors.UnknownNetworkException;
 import com.example.currenciesapp.general.BasePresenter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
@@ -15,6 +18,8 @@ import javax.inject.Inject;
 public class CurrenciesPresenter extends BasePresenter {
 
     private final ExchangeRatesRepository repository;
+    private List<ExchangeRate> rates;
+    private float multiplier = 1;
 
     @Inject
     public CurrenciesPresenter(ExchangeRatesRepository repository) {
@@ -25,14 +30,16 @@ public class CurrenciesPresenter extends BasePresenter {
         addDisposable(repository.observeRates()
                 .subscribe(listResult -> {
                             if (listResult.success() && listResult.getData().size() != 0) {
-                                Currency baseCurrency = Currency.getInstance(listResult.getData().get(0).base);
-                                List<ExchangeRatesViewModel> list = new ArrayList<>();
-                                list.add(new ExchangeRatesViewModel(baseCurrency.getCurrencyCode(),
-                                        baseCurrency.getDisplayName(), 1));
+                                rates = listResult.getData();
 
-                                for (ExchangeRate rate : listResult.getData()) {
-                                    list.add(new ExchangeRatesViewModel(rate.currency.getCurrencyCode(),
-                                            rate.currency.getDisplayName(), rate.rate));
+                                List<ExchangeRatesViewModel> list = new ArrayList<>();
+                                Currency baseCurrency = Currency.getInstance(listResult.getData().get(0).base);
+                                rates.add(0, new ExchangeRate(baseCurrency.getCurrencyCode(), baseCurrency, 1));
+
+                                for (ExchangeRate rate : rates) {
+                                    ExchangeRatesViewModel viewModel = new ExchangeRatesViewModel(rate.currency.getCurrencyCode(),
+                                            rate.currency.getDisplayName(), rate.rate * multiplier);
+                                    list.add(viewModel);
                                 }
 
                                 screen.displayCurrencies(list);
@@ -47,7 +54,23 @@ public class CurrenciesPresenter extends BasePresenter {
                                 }
                             }
                         }
-                     ));
+                ));
+    }
+
+    void onAmountChanged(CurrenciesScreen screen) {
+        Money money = screen.getInsertedMoneyAmount();
+        for (ExchangeRate rate : rates) {
+            if (rate.currency.equals(money.currency)) {
+                multiplier = money.amount.divide(new BigDecimal(rate.rate), 2, RoundingMode.CEILING).floatValue();
+            }
+        }
+        List<ExchangeRatesViewModel> viewModelList = new ArrayList<>();
+        for (ExchangeRate rate : rates) {
+            viewModelList.add(new ExchangeRatesViewModel(rate.currency.getCurrencyCode(),
+                    rate.currency.getDisplayName(), rate.rate * multiplier));
+        }
+        screen.displayCurrencies(viewModelList);
+
     }
 
 }

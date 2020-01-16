@@ -1,17 +1,19 @@
 package com.example.currenciesapp.currencies_screen;
 
+import com.github.nitrico.lastadapter.StableId;
+
 /**
  * Data class that is used to display currencies.
  */
-public class ExchangeRatesViewModel {
+public class ExchangeRatesViewModel implements StableId {
     public final String currencyCode;
     public final String currency;
-    public final double rate;
+    public final double amount;
 
-    public ExchangeRatesViewModel(String currencyCode, String currency, double rate) {
+    public ExchangeRatesViewModel(String currencyCode, String currency, double amount) {
         this.currencyCode = currencyCode;
         this.currency = currency;
-        this.rate = rate;
+        this.amount = amount;
     }
 
     @Override
@@ -31,5 +33,10 @@ public class ExchangeRatesViewModel {
         int result = currencyCode != null ? currencyCode.hashCode() : 0;
         result = 31 * result + (currency != null ? currency.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public long getStableId() {
+        return (long)hashCode();
     }
 }
