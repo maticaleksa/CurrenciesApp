@@ -96,13 +96,15 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
         holder.amount.addTextChangedListener(new BasicTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                if (!holder.amount.isFocused() || s.toString() == null || s.toString().equals(""))
+                String input = s.toString();
+                if (!holder.amount.isFocused() || input == null || input.equals(""))
                     return;
-                ExchangeRatesViewModel newModel = new ExchangeRatesViewModel(focusedItem.currencyCode, focusedItem.currency, Double.valueOf(s.toString()));
+                if (input.equals(".")) input="0";
+                ExchangeRatesViewModel newModel = new ExchangeRatesViewModel(focusedItem.currencyCode, focusedItem.currency, Double.valueOf(input));
                 list.set(list.indexOf(focusedItem), newModel);
                 focusedItem = newModel;
                 itemClickListener.onAmountChanged(
-                        new Money(BigDecimal.valueOf(Float.valueOf(s.toString())), Currency.getInstance(focusedItem.currencyCode))
+                        new Money(BigDecimal.valueOf(Float.valueOf(input)), Currency.getInstance(focusedItem.currencyCode))
                 );
             }
         });

@@ -61,7 +61,7 @@ public class CurrenciesPresenter extends BasePresenter {
         Money money = screen.getInsertedMoneyAmount();
         for (ExchangeRate rate : rates) {
             if (rate.currency.equals(money.currency)) {
-                multiplier = money.amount.divide(new BigDecimal(rate.rate), 2, RoundingMode.CEILING).floatValue();
+                multiplier = money.amount.divide(new BigDecimal(rate.rate), 4, RoundingMode.CEILING).floatValue();
             }
         }
         List<ExchangeRatesViewModel> viewModelList = new ArrayList<>();
