@@ -1,7 +1,8 @@
-package com.example.currenciesapp;
+package com.example.currenciesapp.repositories;
 
 import com.example.currenciesapp.domain.ExchangeRate;
 import com.example.currenciesapp.errors.NoInternetException;
+import com.example.currenciesapp.general.Result;
 import com.example.currenciesapp.network.NetworkRates;
 import com.example.currenciesapp.network.NetworkRatesSource;
 import com.example.currenciesapp.network_checking.NetworkConnectivityNotifier;
@@ -9,11 +10,7 @@ import com.example.currenciesapp.errors.UnknownNetworkException;
 import com.example.currenciesapp.room.RoomExchangeRate;
 import com.example.currenciesapp.room.RoomExchangeRateDao;
 
-import java.util.ArrayList;
-import java.util.Currency;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -30,20 +27,29 @@ public class ExchangeRatesRepository {
     private final RoomExchangeRateDao dao;
     private final NetworkRatesSource networkRatesSource;
     private final NetworkConnectivityNotifier networkConnectivityNotifier;
+    private final ExchangeRatesDomainConverter domainConverter;
+    /**
+     * Defines how often network should be queried.
+     */
+    private final QueryFrequency queryFrequency;
 
     @Inject
     public ExchangeRatesRepository(RoomExchangeRateDao dao,
                                    NetworkRatesSource networkRatesSource,
-                                   NetworkConnectivityNotifier networkConnectivityNotifier) {
+                                   NetworkConnectivityNotifier networkConnectivityNotifier,
+                                   ExchangeRatesDomainConverter domainConverter,
+                                   QueryFrequency queryFrequency) {
         this.dao = dao;
         this.networkRatesSource = networkRatesSource;
         this.networkConnectivityNotifier = networkConnectivityNotifier;
+        this.domainConverter = domainConverter;
+        this.queryFrequency = queryFrequency;
     }
 
     /**
      * Exposes a stream that emits List<ExchangeRate> from the database.
-     * The network api is queried every second which updates the database
-     * (causing new emissions every 1 second).
+     * The network api is queried every specified amount of time which updates the database
+     * (causing new emissions every specified amount of time).
      */
     public Observable<Result<List<ExchangeRate>>> observeRates() {
         return getFromDb()
@@ -51,7 +57,7 @@ public class ExchangeRatesRepository {
                         networkConnectivityNotifier.observeConnectionStatus()
                                 .switchMap(isConnected -> {
                                             if (isConnected) {
-                                                return Observable.interval(1, TimeUnit.SECONDS)
+                                                return queryFrequency.getIntervalObservable()
                                                         .switchMap(_a -> getFromNetwork());
 
                                             } else {
@@ -68,37 +74,22 @@ public class ExchangeRatesRepository {
                 return Result.<List<ExchangeRate>>error(new UnknownNetworkException(response.message()));
             }
             NetworkRates networkRates = response.body();
-            String base = networkRates.base;
-            Map<String, Double> rates = networkRates.rates;
-            List<RoomExchangeRate> roomExchangeRateList = new ArrayList<>();
-            for (String key : rates.keySet()) {
-                roomExchangeRateList.add(
-                        new RoomExchangeRate(key, rates.get(key), base));
-            }
+
+            List<RoomExchangeRate> roomExchangeRateList = domainConverter.convertFromNetworkToRoom(networkRates);
             dao.insert(roomExchangeRateList);
-            List<ExchangeRate> exchangeRates = new ArrayList<>();
-            for (String key : rates.keySet()) {
-                exchangeRates.add(new ExchangeRate(base,
-                        Currency.getInstance(key), rates.get(key)));
-            }
-            return Result.success(exchangeRates);
+            return Result.success(domainConverter.convertFromNetworkToDomain(networkRates));
         })
                 .observeOn(AndroidSchedulers.mainThread())
-                .filter(exchangeRates -> false);
+                .subscribeOn(Schedulers.io())
+                .filter(result -> !result.success());
     }
+
 
     private Observable<Result<List<ExchangeRate>>> getFromDb() {
         return dao.getAll()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(roomExchangeRates -> {
-                    List<ExchangeRate> exchangeRates = new ArrayList<>();
-                    for (RoomExchangeRate roomRate : roomExchangeRates) {
-                        exchangeRates.add(new ExchangeRate(roomRate.base,
-                                Currency.getInstance(roomRate.currencyCode), roomRate.exchangeRate));
-                    }
-                    return exchangeRates;
-                })
+                .map(domainConverter::convertFromRoomToDomain)
                 .map(Result::success)
                 .toObservable();
     }

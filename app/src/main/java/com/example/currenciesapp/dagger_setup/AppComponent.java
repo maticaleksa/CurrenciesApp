@@ -3,6 +3,7 @@ package com.example.currenciesapp.dagger_setup;
 import android.app.Application;
 
 import com.example.currenciesapp.CurrenciesApplication;
+import com.example.currenciesapp.repositories.ExchangeRateRepositoryDaggerModule;
 
 import javax.inject.Singleton;
 
@@ -13,7 +14,7 @@ import dagger.android.support.AndroidSupportInjectionModule;
 
 @Singleton
 @Component(modules = {AndroidSupportInjectionModule.class, ActivityBuildersModule.class,
-        NetworkModule.class, RoomDatabaseModule.class})
+        NetworkModule.class, RoomDatabaseModule.class, ExchangeRateRepositoryDaggerModule.class})
 public interface AppComponent extends AndroidInjector<CurrenciesApplication> {
 
     void inject(CurrenciesApplication application);

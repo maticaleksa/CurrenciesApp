@@ -1,6 +1,6 @@
 package com.example.currenciesapp.currencies_screen;
 
-import com.example.currenciesapp.ExchangeRatesRepository;
+import com.example.currenciesapp.repositories.ExchangeRatesRepository;
 import com.example.currenciesapp.domain.ExchangeRate;
 import com.example.currenciesapp.domain.Money;
 import com.example.currenciesapp.errors.NoInternetException;

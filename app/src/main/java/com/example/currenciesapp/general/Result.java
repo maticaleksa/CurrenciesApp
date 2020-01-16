@@ -1,4 +1,4 @@
-package com.example.currenciesapp;
+package com.example.currenciesapp.general;
 
 public class Result<T> {
 

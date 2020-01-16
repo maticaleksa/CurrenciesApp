@@ -36,4 +36,5 @@ ext {
     roomVersion = '2.2.2'
     okhttp_logging_version = '3.8.0'
     glide_version = '4.10.0'
+    mockito_version = '1.10.19'
 }

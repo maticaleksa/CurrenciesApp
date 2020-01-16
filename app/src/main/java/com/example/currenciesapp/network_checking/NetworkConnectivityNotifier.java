@@ -40,19 +40,15 @@ public class NetworkConnectivityNotifier {
         context.registerReceiver(broadcastReceiver, intentFilter);
     }
 
+    /**
+     * Returns an Observable<Boolean> which immediately emits the current Connection status boolean
+     * and also emits any changes to the connection status.
+     */
     public Observable<Boolean> observeConnectionStatus() {
         return Observable.fromCallable(() -> {
             NetworkInfo info = cm.getActiveNetworkInfo();
             if (info == null || !info.isConnected()) return false;
             return true;
         }).mergeWith(connectivitySubject);
-    }
-
-    /**
-     * Emits a boolean containing the information about internet connection when ever connectivity
-     * changes.
-     */
-    public Observable<Boolean> getNotifier() {
-        return connectivitySubject;
     }
 }
