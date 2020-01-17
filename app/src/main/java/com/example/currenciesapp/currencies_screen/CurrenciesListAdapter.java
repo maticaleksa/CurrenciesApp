@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -20,6 +19,8 @@ import com.example.currenciesapp.general.BasicTextWatcher;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
@@ -51,11 +52,11 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
     }
 
     public void setList(List<ExchangeRatesViewModel> list) {
+        List<ExchangeRatesViewModel> old = this.list;
         if (focusedItem != null) {
+            Collections.sort(list, (left, right) -> Integer.compare(old.indexOf(left), old.indexOf(right)));
             int index = list.indexOf(focusedItem);
-            ExchangeRatesViewModel first = list.get(0);
-            list.set(0, focusedItem);
-            list.set(index, first);
+            list.set(index, focusedItem);
         }
         this.list = list;
         notifyDataSetChanged();
@@ -99,7 +100,7 @@ public class CurrenciesListAdapter extends RecyclerView.Adapter<CurrenciesListAd
                 String input = s.toString();
                 if (!holder.amount.isFocused() || input == null || input.equals(""))
                     return;
-                if (input.equals(".")) input="0";
+                if (input.equals(".")) input = "0";
                 ExchangeRatesViewModel newModel = new ExchangeRatesViewModel(focusedItem.currencyCode, focusedItem.currency, Double.valueOf(input));
                 list.set(list.indexOf(focusedItem), newModel);
                 focusedItem = newModel;

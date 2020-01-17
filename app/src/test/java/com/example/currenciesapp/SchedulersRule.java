@@ -11,7 +11,7 @@ import org.junit.rules.ExternalResource;
 
 import java.util.concurrent.Callable;
 
-class SchedulersRule extends ExternalResource {
+public class SchedulersRule extends ExternalResource {
 
     private TestScheduler testScheduler = new TestScheduler();
     private Function<Scheduler, Scheduler> testSchedulerFunction = scheduler -> testScheduler;
@@ -22,7 +22,7 @@ class SchedulersRule extends ExternalResource {
     private Function<Callable<Scheduler>, Scheduler> oldInitMainThreadHandler;
     private Function<Scheduler, Scheduler> oldMainThreadHandler;
 
-    TestScheduler getTestScheduler() {
+    public TestScheduler getTestScheduler() {
         return testScheduler;
     }
 

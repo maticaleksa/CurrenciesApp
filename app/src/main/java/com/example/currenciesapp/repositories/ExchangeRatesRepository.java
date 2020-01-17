@@ -10,6 +10,7 @@ import com.example.currenciesapp.errors.UnknownNetworkException;
 import com.example.currenciesapp.room.RoomExchangeRate;
 import com.example.currenciesapp.room.RoomExchangeRateDao;
 
+import java.util.Currency;
 import java.util.List;
 
 import javax.inject.Inject;
