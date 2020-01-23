@@ -23,7 +23,7 @@ public class GetExchangeRatesUseCase {
     public Observable<Result<List<ExchangeRate>>> observeRates() {
         return repository.observeRates()
                 .map(listResult -> {
-                    if (!listResult.success()) return listResult;
+                    if (!listResult.success() || listResult.getData().size() == 0) return listResult;
                     List<ExchangeRate> list = listResult.getData();
                     // add the base currency
                     Currency baseCurrency = Currency.getInstance(list.get(0).base);
